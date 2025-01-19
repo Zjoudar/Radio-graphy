@@ -128,7 +128,7 @@ def welcome():
 @app.route('/success' , methods = ['GET' , 'POST'])
 def success():
     error = ''
-    target_img = os.path.join(os.getcwd() , 'Python-Flask-Authentication-Tutorial-main/static/images')
+    target_img = os.path.join(os.getcwd() , 'static/images')
     if request.method == 'POST':
         if(request.form):
             link = request.form.get('link')
