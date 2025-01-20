@@ -1,4 +1,5 @@
 from email.mime import image
+import io
 import os
 import uuid
 import flask
@@ -8,13 +9,15 @@ from tensorflow.keras.models import load_model
 from flask import Flask , render_template  , request , send_file
 from tensorflow.keras.preprocessing.image import load_img , img_to_array
 import numpy as np
+from PIL import Image
+from io import BytesIO
+
 
 
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-#model = load_model(os.path.join(BASE_DIR , 'Python-Flask-Authentication-Tutorial-main/finnalproject_Apps.h5'))
-model = load_model(os.path.join(BASE_DIR , 'Python-Flask-Authentication-Tutorial-main/finnalproject_Apps.h5')) 
-#model = load_model('finnalproject_Apps.h5')
+#model = load_model(os.path.join(BASE_DIR , 'finnalproject_Apps.h5'))
+model = load_model(r'C:\Users\user\Downloads\Dataset\Python-Flask-Authentication-Tutorial-main\finnalproject_Apps.h5')
 ALLOWED_EXT = set(['jpg' , 'jpeg' , 'png' , 'jfif'])
 def allowed_file(filename):
     return '.' in filename and \
@@ -24,34 +27,40 @@ def allowed_file(filename):
 classes = ['Degenerative Infectious Disease','Encapsulated Lesions','Higher Density','Lower Density','Mediastinal Alterations',
           'Normal Anatomy','Obstructive Pulmonary Diseases','Pneumonia','Tuberculosis', 'Cavity', 'Fillings', 'Periodontitis', 'bone loss', 'decay', 'fractured', 'glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
 
-def predict(filename , model):
-    img = load_img(filename , target_size = (224 , 224))
-    img = img_to_array(img)
-    img = img.reshape(1 , 224 ,224 ,3)
+def predict(file, model):
+    try:
+        img = Image.open(file)
+        img = img.resize((224, 224))
+        img_io = BytesIO()
+        img.save(img_io, format='JPEG')
+        img_io.seek(0)
+        img = Image.open(img_io)
+        img = img_to_array(img)
+        img = img.reshape(1, 224, 224, 3)
+        img = img.astype('float32')
+        img /= 255.0
+        result = model.predict(img)
 
-    img = img.astype('float32')
-    img = img/255.0
-    result = model.predict(img)
+        dict_result = {}
+        for i in range(len(result[0])):
+            dict_result[round(result[0][i], 4)] = classes[i]
 
-    dict_result = {}
-    for i in range(len(result[0])):
-        dict_result[round(result[0][i], 4)] = classes[i]
+        res = result[0]
+        res.sort()
+        res = res[::-1]
+        prob = res[:3]
 
-    res = result[0]
-    res.sort()
-    res = res[::-1]
-    prob = res[:3]
+        prob_result = []
+        class_result = []
+        for i in range(3):
+            prob_result.append((prob[i]*100).round(2))
+            class_result.append(dict_result[round(prob[i], 4)]) 
 
-    prob_result = []
-    class_result = []
-    for i in range(3):
-        prob_result.append((prob[i]*100).round(2))
-        class_result.append(dict_result[round(prob[i], 4)]) 
+        return class_result, prob_result
 
-    return class_result, prob_result
-
-
-
+    except (IOError, OSError) as e:
+        print(f"Error processing image: {str(e)}")
+        return None, None
 
 
 from flask import Flask, request,render_template, redirect,session
@@ -126,42 +135,38 @@ def welcome():
 @app.route('/success' , methods = ['GET' , 'POST'])
 def success():
     error = ''
-    target_img = os.path.join(os.getcwd() , 'static/images')
+
     if request.method == 'POST':
-        if (request.files):
+        if request.files:
             file = request.files['file']
             if file and allowed_file(file.filename):
-                file.save(os.path.join(target_img , file.filename))
-                img_path = os.path.join(target_img , file.filename)
-                img = file.filename
+                try:
+                    class_result, prob_result = predict(file, model) 
 
-                class_result , prob_result = predict(img_path , model)
-
-                predictions = {
-                    "class1":class_result[0],
-                    "class2":class_result[1],
-                    "class3":class_result[2],
-                    "prob1": prob_result[0],
-                    "prob2": prob_result[1],
-                    "prob3": prob_result[2],
+                    predictions = {
+                        "class1": class_result[0],
+                        "class2": class_result[1],
+                        "class3": class_result[2],
+                        "prob1": prob_result[0],
+                        "prob2": prob_result[1],
+                        "prob3": prob_result[2],
                     }
 
+                    return render_template('success.html', img=file.filename, predictions=predictions)
+                except (IOError, OSError) as e:
+                    error = f"Error processing image: {str(e)}"
+                except Exception as e:
+                    error = "An unexpected error occurred."
             else:
-                error = "Please upload images of jpg , jpeg and png extension only"
+                error = "Please upload images of jpg, jpeg, and png extension only"
 
-        if(len(error) == 0):
-            return render_template('success.html' , img = img , predictions = predictions)
         else:
-           return render_template('index0.html' , error = error)
+            error = "No file uploaded."
 
-    else:
-        return render_template('index0.html')
-    
+    return render_template('index0.html', error=error)
+
 if __name__ == "__main__":
     app.run(debug = True)
-
-
-
 
 
 
