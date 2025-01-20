@@ -30,13 +30,13 @@ classes = ['Degenerative Infectious Disease','Encapsulated Lesions','Higher Dens
 def predict(file, model):
     try:
         img = Image.open(file)
-        img = img.resize((224, 224))
+        img = img.resize((32, 32))
         img_io = BytesIO()
         img.save(img_io, format='JPEG')
         img_io.seek(0)
         img = Image.open(img_io)
         img = img_to_array(img)
-        img = img.reshape(1, 224, 224, 3)
+        img = img.reshape(1, 32, 32, 3)
         img = img.astype('float32')
         img /= 255.0
         result = model.predict(img)
