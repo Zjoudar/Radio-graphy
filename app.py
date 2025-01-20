@@ -16,7 +16,7 @@ from io import BytesIO
 
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model = load_model(os.path.join(BASE_DIR , 'Python-Flask-Authentication-Tutorial-main\finnalproject_Apps.h5'))
+model = load_model(os.path.join(BASE_DIR , 'finnalproject_Apps.h5'))
 #model = load_model(r'C:\Users\user\Downloads\Dataset\Python-Flask-Authentication-Tutorial-main\finnalproject_Apps.h5')
 ALLOWED_EXT = set(['jpg' , 'jpeg' , 'png' , 'jfif'])
 def allowed_file(filename):
