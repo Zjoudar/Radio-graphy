@@ -92,45 +92,42 @@ with app.app_context():
 
 @app.route('/')
 def index():
-    return render_template('index.html')
-
-@app.route('/register',methods=['GET','POST'])
-def register():
-    if request.method == 'POST':
-        # handle request
-        name = request.form['name']
-        email = request.form['email']
-        password = request.form['password']
-
-        new_user = User(name=name,email=email,password=password)
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect('/welcome')
-
-
-
-    return render_template('register.html')
-
-@app.route('/login',methods=['GET','POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-
-        user = User.query.filter_by(email=email).first()
-        
-        if user and user.check_password(password):
-            session['email'] = user.email
-            return redirect('/welcome')
-        else:
-            return render_template('login.html',error='Invalid user')
-
-    return render_template('login.html')
-
-
-@app.route('/welcome')
-def welcome():
     return render_template('welcome.html')
+
+#@app.route('/register',methods=['GET','POST'])
+#def register():
+ #   if request.method == 'POST':
+  #      # handle request
+   #     name = request.form['name']
+    #    email = request.form['email']
+     #   password = request.form['password']
+
+      #  new_user = User(name=name,email=email,password=password)
+       # db.session.add(new_user)
+        #db.session.commit()
+        #return redirect('/welcome')
+#   return render_template('register.html')
+
+#@app.route('/login',methods=['GET','POST'])
+#def login():
+ #   if request.method == 'POST':
+  #      email = request.form['email']
+   #     password = request.form['password']
+
+    #    user = User.query.filter_by(email=email).first()
+        
+     #   if user and user.check_password(password):
+      #      session['email'] = user.email
+       #     return redirect('/welcome')
+        #else:
+         #   return render_template('login.html',error='Invalid user')
+
+   # return render_template('login.html')
+
+
+#@app.route('/welcome')
+#def welcome():
+ #   return render_template('welcome.html')
   
 @app.route('/success' , methods = ['GET' , 'POST'])
 def success():
