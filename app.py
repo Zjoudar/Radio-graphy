@@ -50,17 +50,15 @@ def predict(file, model):
         res = res[::-1]
         prob = res[:3]
 
-        prob_result = []
         class_result = []
-        for i in range(3):
-            prob_result.append((prob[i]*100).round(2))
+        for i in range(1):
             class_result.append(dict_result[round(prob[i], 4)]) 
 
-        return class_result, prob_result
+        return class_result
 
     except (IOError, OSError) as e:
         print(f"Error processing image: {str(e)}")
-        return None, None
+        return None
 
 
 from flask import Flask, request,render_template, redirect,session
@@ -141,12 +139,7 @@ def success():
                     class_result, prob_result = predict(file, model) 
 
                     predictions = {
-                        "class1": class_result[0],
-                        "class2": class_result[1],
-                        "class3": class_result[2],
-                        "prob1": prob_result[0],
-                        "prob2": prob_result[1],
-                        "prob3": prob_result[2],
+                        "class1": class_result[0]
                     }
 
                     return render_template('success.html', img=file.filename, predictions=predictions)
