@@ -34,7 +34,7 @@ from tensorflow.keras.applications.resnet50 import preprocess_input  # Assuming 
 
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model = load_model(os.path.join(BASE_DIR, r'C:\Users\user\Downloads\Dataset\Python-Flask-Authentication-Tutorial-main\finnalproject_Apps.h5'))
+model = load_model(os.path.join(BASE_DIR, 'finnalproject_Apps.h5'))
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} 
 
 app.config['UPLOAD_FOLDER'] = 'uploads' 
