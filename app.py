@@ -45,7 +45,7 @@ def allowed_file(filename):
 
 @app.route('/', methods=['GET'])
 def hello_word():
-    return render_template('index.html')
+    return render_template('IndexApp.html')
 
 @app.route('/', methods=['POST'])
 def predict():
