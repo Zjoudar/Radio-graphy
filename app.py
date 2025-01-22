@@ -72,13 +72,13 @@ def predict():
             predicted_class_index = np.argmax(yhat)
             predicted_class = "Predicted Class: " + str(predicted_class_index)  # Replace with your class labels if needed
 
-            return render_template('index.html', prediction=predicted_class)
+            return render_template('IndexApp.html', prediction=predicted_class)
 
         except Exception as e:
-            return render_template('index.html', prediction=f"Error processing image: {str(e)}")
+            return render_template('IndexApp.html', prediction=f"Error processing image: {str(e)}")
 
     else:
-        return render_template('index.html', prediction='Invalid image format')
+        return render_template('IndexApp.html', prediction='Invalid image format')
 
 if __name__ == '__main__':
     app.config['UPLOAD_FOLDER'] = 'uploads'  # Assuming you have an 'uploads' directory for storing images
