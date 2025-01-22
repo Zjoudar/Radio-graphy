@@ -56,9 +56,19 @@ def predict(file, model):
 
         return class_result
 
-    except (IOError) as e:
-        print(f"Error processing image: {str(e)}")
+    except IOError as e:
+        print(f"Error reading image: {e}")
         return None
+    except OSError as e:
+        print(f"Operating system error occurred: {e}")
+        return None
+    except ValueError as e:
+        print(f"Value error occurred during image processing: {e}")
+        return None
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        logging.exception("Unexpected error during prediction:")
+        return None 
 
 
 from flask import Flask, request,render_template, redirect,session
