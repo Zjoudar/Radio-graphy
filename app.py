@@ -13,163 +13,76 @@ from PIL import Image
 from io import BytesIO
 import logging
 
+from flask import Flask, render_template, request
+
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.applications.vgg16 import preprocess_input
+from keras.applications.vgg16 import decode_predictions
+#from keras.applications.vgg16 import VGG16
+from keras.applications.resnet50 import ResNet50
+import os 
+from tensorflow.keras.models import load_model
+import numpy as np
+
+
+from flask import Flask, render_template, request
+import os
+from tensorflow.keras.models import load_model
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from tensorflow.keras.applications.resnet50 import preprocess_input  # Assuming ResNet50
 
 app = Flask(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-model = load_model(os.path.join(BASE_DIR , 'Zakaria.h5'))
-#model = load_model(r'C:\Users\user\Downloads\Dataset\Python-Flask-Authentication-Tutorial-main\finnalproject_Apps.h5')
-ALLOWED_EXT = set(['jpg' , 'jpeg' , 'png' , 'jfif'])
+model = load_model(os.path.join(BASE_DIR, r'C:\Users\user\Downloads\Dataset\Python-Flask-Authentication-Tutorial-main\finnalproject_Apps.h5'))
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} 
+
+app.config['UPLOAD_FOLDER'] = 'uploads' 
+
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1] in ALLOWED_EXT
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@app.route('/', methods=['GET'])
+def hello_word():
+    return render_template('index.html')
 
-classes = ['Degenerative Infectious Disease','Encapsulated Lesions','Higher Density','Lower Density','Mediastinal Alterations',
-          'Normal Anatomy','Obstructive Pulmonary Diseases','Pneumonia','Tuberculosis', 'Cavity', 'Fillings', 'Periodontitis', 'bone loss', 'decay', 'fractured', 'glioma_tumor', 'meningioma_tumor', 'no_tumor', 'pituitary_tumor']
+@app.route('/', methods=['POST'])
+def predict():
+    if 'imagefile' not in request.files:
+        return render_template('index.html', prediction='No image uploaded!')
 
-def predict(file, model):
-    try:
-        img = Image.open(file)
-        img = img.resize((32, 32))
-#        img_io = BytesIO()
- #       img.save(img_io, format='JPEG')
-  #      img_io.seek(0)
-   #     img = Image.open(img_io)
-        img = img_to_array(img)
-        img = img.reshape(1, 32, 32, 3)
-        img = img.astype('float32')
-        img /= 255.0
-        result = model.predict(img)
+    imageFile = request.files['imagefile']
 
-        dict_result = {}
-        for i in range(len(result[0])):
-            dict_result[round(result[0][i], 4)] = classes[i]
+    if imageFile.filename == '':
+        return render_template('index.html', prediction='No selected file')
 
-        res = result[0]
-        res.sort()
-        res = res[::-1]
-        prob = res[:3]
+    if imageFile and allowed_file(imageFile.filename):  # Assuming you have an 'allowed_file' function for validation
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], imageFile.filename)  # Assuming you have an 'UPLOAD_FOLDER' config variable
+        imageFile.save(image_path)
 
-        class_result = []
-        for i in range(1):
-            class_result.append(dict_result[round(prob[i], 4)]) 
+        try:
+            image = load_img(image_path, target_size=(224, 224))
+            image = img_to_array(image)
+            image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))  # Handle potential grayscale images
+            image = preprocess_input(image)
+            yhat = model.predict(image)
 
-        return class_result
+            # Handle model output format (assuming single class label)
+            predicted_class_index = np.argmax(yhat)
+            predicted_class = "Predicted Class: " + str(predicted_class_index)  # Replace with your class labels if needed
 
-    except IOError as e:
-        print(f"Error reading image: {e}")
-        return None
-    except OSError as e:
-        print(f"Operating system error occurred: {e}")
-        return None
-    except ValueError as e:
-        print(f"Value error occurred during image processing: {e}")
-        return None
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-        logging.exception("Unexpected error during prediction:")
-        return None 
+            return render_template('index.html', prediction=predicted_class)
 
+        except Exception as e:
+            return render_template('index.html', prediction=f"Error processing image: {str(e)}")
 
-from flask import Flask, request,render_template, redirect,session
-from flask_sqlalchemy import SQLAlchemy
-import bcrypt
+    else:
+        return render_template('index.html', prediction='Invalid image format')
 
-#app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-#db = SQLAlchemy(app)
-#app.secret_key = 'secret_key'
-
-#class User(db.Model):
- #   id = db.Column(db.Integer, primary_key=True)
-  #  name = db.Column(db.String(100), nullable=False)
-   # email = db.Column(db.String(100), unique=True)
-    #password = db.Column(db.String(100))
-
-#    def __init__(self,email,password,name):
- #       self.name = name
-  #      self.email = email
-   #     self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    
-    #def check_password(self,password):
-     #   return bcrypt.checkpw(password.encode('utf-8'),self.password.encode('utf-8'))
-
-#with app.app_context():
- #   db.create_all()
-
-
-@app.route('/')
-def index():
-    return render_template('welcome.html')
-
-#@app.route('/register',methods=['GET','POST'])
-#def register():
- #   if request.method == 'POST':
-  #      # handle request
-   #     name = request.form['name']
-    #    email = request.form['email']
-     #   password = request.form['password']
-
-      #  new_user = User(name=name,email=email,password=password)
-       # db.session.add(new_user)
-        #db.session.commit()
-        #return redirect('/welcome')
-#   return render_template('register.html')
-
-#@app.route('/login',methods=['GET','POST'])
-#def login():
- #   if request.method == 'POST':
-  #      email = request.form['email']
-   #     password = request.form['password']
-
-    #    user = User.query.filter_by(email=email).first()
-        
-     #   if user and user.check_password(password):
-      #      session['email'] = user.email
-       #     return redirect('/welcome')
-        #else:
-         #   return render_template('login.html',error='Invalid user')
-
-   # return render_template('login.html')
-
-
-#@app.route('/welcome')
-#def welcome():
- #   return render_template('welcome.html')
-  
-@app.route('/success' , methods = ['GET' , 'POST'])
-def success():
-    error = ''
-
-    if request.method == 'POST':
-        if request.files:
-            file = request.files['file']
-            if file and allowed_file(file.filename):
-                try:
-                    class_result, prob_result = predict(file, model) 
-
-                    predictions = {
-                        "class1": class_result[0]
-                    }
-
-                    return render_template('success.html', img=file.filename, predictions=predictions)
-                except (IOError) as e:
-                    error = f"Error processing image: {str(e)}"
-                except Exception as e:
-                    error = "An unexpected error occurred."
-                    logging.exception("Error during prediction:")
-            else:
-                error = "Please upload images of jpg, jpeg, and png extension only"
-
-        else:
-            error = "No file uploaded."
-
-    return render_template('index0.html', error=error)
-
-if __name__ == "__main__":
-    app.run()
-
-
+if __name__ == '__main__':
+    app.config['UPLOAD_FOLDER'] = 'uploads'  # Assuming you have an 'uploads' directory for storing images
+    app.run(port=3000, debug=True)
 
 
 
