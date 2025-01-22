@@ -11,7 +11,7 @@ from tensorflow.keras.preprocessing.image import load_img , img_to_array
 import numpy as np
 from PIL import Image
 from io import BytesIO
-
+import logging
 
 
 app = Flask(__name__)
@@ -31,10 +31,10 @@ def predict(file, model):
     try:
         img = Image.open(file)
         img = img.resize((32, 32))
-        img_io = BytesIO()
-        img.save(img_io, format='JPEG')
-        img_io.seek(0)
-        img = Image.open(img_io)
+#        img_io = BytesIO()
+ #       img.save(img_io, format='JPEG')
+  #      img_io.seek(0)
+   #     img = Image.open(img_io)
         img = img_to_array(img)
         img = img.reshape(1, 32, 32, 3)
         img = img.astype('float32')
@@ -56,7 +56,7 @@ def predict(file, model):
 
         return class_result
 
-    except (IOError, OSError) as e:
+    except (IOError) as e:
         print(f"Error processing image: {str(e)}")
         return None
 
@@ -65,27 +65,27 @@ from flask import Flask, request,render_template, redirect,session
 from flask_sqlalchemy import SQLAlchemy
 import bcrypt
 
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-db = SQLAlchemy(app)
-app.secret_key = 'secret_key'
+#app = Flask(__name__)
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+#db = SQLAlchemy(app)
+#app.secret_key = 'secret_key'
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    email = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
+#class User(db.Model):
+ #   id = db.Column(db.Integer, primary_key=True)
+  #  name = db.Column(db.String(100), nullable=False)
+   # email = db.Column(db.String(100), unique=True)
+    #password = db.Column(db.String(100))
 
-    def __init__(self,email,password,name):
-        self.name = name
-        self.email = email
-        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+#    def __init__(self,email,password,name):
+ #       self.name = name
+  #      self.email = email
+   #     self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     
-    def check_password(self,password):
-        return bcrypt.checkpw(password.encode('utf-8'),self.password.encode('utf-8'))
+    #def check_password(self,password):
+     #   return bcrypt.checkpw(password.encode('utf-8'),self.password.encode('utf-8'))
 
-with app.app_context():
-    db.create_all()
+#with app.app_context():
+ #   db.create_all()
 
 
 @app.route('/')
@@ -143,10 +143,11 @@ def success():
                     }
 
                     return render_template('success.html', img=file.filename, predictions=predictions)
-                except (IOError, OSError) as e:
+                except (IOError) as e:
                     error = f"Error processing image: {str(e)}"
                 except Exception as e:
                     error = "An unexpected error occurred."
+                    logging.exception("Error during prediction:")
             else:
                 error = "Please upload images of jpg, jpeg, and png extension only"
 
