@@ -82,7 +82,7 @@ def predict():
 
 if __name__ == '__main__':
     app.config['UPLOAD_FOLDER'] = 'uploads'  # Assuming you have an 'uploads' directory for storing images
-    app.run(port=3000, debug=True)
+    app.run(debug=True)
 
 
 
