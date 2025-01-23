@@ -71,7 +71,8 @@ def predict():
             # Handle model output format (assuming single class label)
             predicted_class_index = np.argmax(yhat)
             predicted_class = "Predicted Class: " + str(predicted_class_index)  # Replace with your class labels if needed
-
+            del image 
+            del image_array
             return render_template('IndexApp.html', prediction=predicted_class)
 
         except Exception as e:
