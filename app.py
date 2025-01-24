@@ -14,7 +14,7 @@ import os
 from tensorflow.keras.models import load_model
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 global model
-model = load_model(os.path.join(BASE_DIR, 'finnalproject_Apps.h5'))
+model = load_model(os.path.join(BASE_DIR, 'finnalproject_Apps_128.h5'))
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -47,7 +47,7 @@ def predict():
 
         try:
             # Handle potential grayscale images (assuming 3 channels for ResNet50)
-            image = load_img(image_path, target_size=(224, 224))
+            image = load_img(image_path, target_size=(128, 128))
             if image.mode == 'L':  # Grayscale
                 image = image.convert('RGB')
 
