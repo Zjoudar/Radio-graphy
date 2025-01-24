@@ -50,8 +50,8 @@ def predict():
             #image = load_img(image_path, target_size=(128, 128))
             image = cv2.imread(image_path)
             image = cv2.resize(image, (128, 128))
-            if image.mode == 'L':  # Grayscale
-                image = image.convert('RGB')
+          #  if image.mode == 'L':  # Grayscale
+           #     image = image.convert('RGB')
 
             image = img_to_array(image)
             image = np.expand_dims(image, axis=0)  # Batch for potential efficiency in model.predict
