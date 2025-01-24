@@ -47,7 +47,9 @@ def predict():
 
         try:
             # Handle potential grayscale images (assuming 3 channels for ResNet50)
-            image = load_img(image_path, target_size=(128, 128))
+            #image = load_img(image_path, target_size=(128, 128))
+            image = cv2.imread(image_path)
+            image = cv2.resize(image, (128, 128))
             if image.mode == 'L':  # Grayscale
                 image = image.convert('RGB')
 
