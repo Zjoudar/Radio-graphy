@@ -1,4 +1,5 @@
 import os
+import time
 import cv2
 import uuid
 import flask
@@ -49,6 +50,7 @@ def predict():
         try:
             # Handle potential grayscale images (assuming 3 channels for ResNet50)
             #image = load_img(image_path, target_size=(128, 128))
+            start_time = time.time()
             image = cv2.imread(image_path)
             image = cv2.resize(image, (128, 128))
           #  if image.mode == 'L':  # Grayscale
@@ -63,14 +65,17 @@ def predict():
             # Handle model output format (assuming single class label)
             predicted_class_index = np.argmax(yhat)
             predicted_class = "Predicted Class: " + str(predicted_class_index)  # Replace with your class labels if needed
-
+            end_time = time.time()
+            processing_time = end_time - start_time
+            print(f"Image processing time: {processing_time:.4f} seconds") 
             return render_template('IndexApp.html', prediction=predicted_class)
 
-        except Exception as e:
-            return render_template('IndexApp.html', prediction=f"Error processing image: {str(e)}")
+        except (IOError, OSError) as e:
+                print(f"Error processing image: {str(e)}")
+                return render_template('index.html', prediction="Error processing image")
 
-        else:
-            return render_template('IndexApp.html', prediction='Invalid image format')
+    else:
+         return render_template('IndexApp.html', prediction='Invalid image format')
 
 if __name__ == '__main__':
     app.config['UPLOAD_FOLDER'] = 'uploads'  # Assuming you have an 'uploads' directory for storing images
