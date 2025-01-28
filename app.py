@@ -17,6 +17,7 @@ from keras.applications.vgg16 import preprocess_input
 from keras.applications.resnet50 import ResNet50
 import os
 from tensorflow.keras.models import load_model
+import concurrent.futures
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 global model
 model = load_model(os.path.join(BASE_DIR, 'Caries_Detection_128.h5'))
