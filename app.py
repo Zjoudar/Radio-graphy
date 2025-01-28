@@ -39,12 +39,12 @@ def index():
 @app.route('/', methods=['POST'])
 def predict():
     if 'imagefile' not in request.files:
-        return render_template('index.html', prediction='No image uploaded!')
+        return render_template('app.html', prediction='No image uploaded!')
 
     imageFile = request.files['imagefile']
 
     if imageFile.filename == '':
-        return render_template('index.html', prediction='No selected file')
+        return render_template('app.html', prediction='No selected file')
 
     if imageFile and allowed_file(imageFile.filename):
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], imageFile.filename)
@@ -72,18 +72,14 @@ def predict():
             end_time = time.time()
             processing_time = end_time - start_time
             print(f"Image processing time: {processing_time:.4f} seconds") 
-            return render_template('index.html', prediction=predicted_class)
+            return render_template('app.html', prediction=predicted_class)
 
         except (IOError, OSError) as e:
                 print(f"Error processing image: {str(e)}")
-                return render_template('index.html', prediction="Error processing image")
+                return render_template('app.html', prediction="Error processing image")
 
     else:
-        return render_template('index.html', prediction='Invalid image format')
-
-if __name__ == '__main__':
-    app.config['UPLOAD_FOLDER'] = 'uploads'  # Assuming you have an 'uploads' directory for storing images
-    app.run(port=3000, debug=True)
+        return render_template('app.html', prediction='Invalid image format')
 
 if __name__ == '__main__':
     app.config['UPLOAD_FOLDER'] = 'uploads'  # Assuming you have an 'uploads' directory for storing images
