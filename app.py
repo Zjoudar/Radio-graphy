@@ -1,5 +1,4 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
 import time
 import cv2
 import uuid
