@@ -35,7 +35,7 @@ def allowed_file(filename):
 
 @app.route('/')
 def index():
-    return render_template('Home.html')
+    return render_template('app.html')
 
 @app.route('/', methods=['POST'])
 def predict():
